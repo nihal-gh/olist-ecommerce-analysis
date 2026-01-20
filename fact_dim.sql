@@ -81,6 +81,14 @@ having count(order_id)>1;
 
 
 
+alter table fact_order_payments 
+add constraint fk_order_orders
+foreign key(product_id)
+references dim_products(product_id);
+
+
+
+
 show tables;
 SELECT * FROM dim_orders LIMIT 5;
 SELECT * FROM dim_products LIMIT 5;
