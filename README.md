@@ -16,7 +16,7 @@ The analysis combines **SQL**, **Python**, and **Power BI** to build an end-to-e
 
   * Pandas, NumPy, Matplotlib
 * **Power BI** – data modeling, interactive dashboards
-* **Jupyter Notebook** – analysis and experimentation
+* **Jupyter Notebook** – analysis, machine leaning and experimentation
 
 ---
 
@@ -136,12 +136,59 @@ Key points:
 
 ---
 
-## 🚀 Future Work
+## Machine Learning Extension – Delivery Delay Prediction
 
-* **Machine Learning Extension:**
-  Build a predictive model to identify orders likely to experience delivery delays using seller history, product category, and order attributes.
-* Explore seller risk scoring and proactive operational alerts.
+The goal of this model is to predict whether an order is at risk of late delivery at the time of purchase, using only information available before shipment.
+### Target Variable
 
----
+A binary target `is_late` was created based on delivery time:
+- `1` → orders delivered after 15 days (75th percentile)
+- `0` → orders delivered within 15 days
 
+This threshold reflects operationally meaningful delays while maintaining class balance.
 
+### Feature Selection
+
+Only features available at order creation time were used to avoid data leakage.
+
+Baseline features:
+- Product price
+- Delivery cost
+- Product category (Top-N grouped)
+
+Additional features tested:
+- Seller average delivery time (historical)
+- Product weight and volume
+
+Post-delivery attributes such as review scores and actual delivery dates were explicitly excluded.
+### Modeling Approach
+
+A Logistic Regression model was used as a baseline due to its interpretability and suitability for tabular data.
+
+Model evaluation focused on recall for late deliveries and ROC-AUC, as missing delayed orders is costlier than false alerts.
+
+### Experimental Results
+
+1. Baseline (order attributes only)
+   - ROC-AUC: ~0.65
+   - Late delivery recall: ~6%
+
+2. Seller average delivery time
+   - ROC-AUC: ~0.71
+   - Late delivery recall: ~14%
+   - Threshold tuning increased recall to ~24%
+
+3. Product weight and volume
+   - No improvement in recall or ROC-AUC
+   - Model became more conservative due to redundant signals
+
+### Decision Threshold Tuning
+
+The default classification threshold (0.5) was adjusted to improve recall for late deliveries.
+Lowering the threshold increased late-order detection at the cost of additional false positives, highlighting the operational trade-off between alert volume and customer experience risk.
+
+### Key Insights
+
+- Seller historical delivery performance is the strongest predictor of late deliveries.
+- Product physical attributes did not add independent predictive power once category and shipping cost were included.
+- Threshold selection significantly impacts operational outcomes and must align with business tolerance for false alerts.
